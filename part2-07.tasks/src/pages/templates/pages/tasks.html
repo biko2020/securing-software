@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head lang="en">
+        <meta charset="UTF-8" />
+        <title>Tasks</title>
+    </head>
+    <body>
+
+        <h2>Tasks</h2>
+
+        <!-- TODO: add the ability to list tasks -->
+        <ul id="tasks">
+        </ul>
+
+
+        <form>
+            <input type="text" name="name" id="name"/>
+            <input type="button" onclick="addTask();" value="Add!"/>
+        </form>
+
+        <!-- the javascript has been embedded to the same site -->
+        <script inline="javascript">
+            // The URL to the application server that holds the tasks.
+            var url = null;
+
+	    function loadTasks() {
+	      var http = new XMLHttpRequest();
+	      http.open("GET", "/tasks", true);
+	      http.setRequestHeader("Content-type", "appliaction/json");
+	      
+	      http.onreadystatechange = function() {
+	       if(http.readyState === 4){
+		if(http.status === 200){
+		 var response = JSON.parse(http.responseText);
+		 var tasks = response.tasks;
+		 tasks.forEach(task=> addTaskToList(task));
+		 }else{
+		 console.log("Error loading tasks :",http.status);
+		 }
+		}
+	      };
+            http.send();
+	    }
+
+	   //functionremoveTask(task){
+		
+	   //  var http = new XMLHttpRequest();
+	   //  http.open("POST", 'remove', true);
+	   //  http.setRequestHeader("Content-type", "application/json");
+	   //  var data = { name: task.name };
+	   //  http.onreadystatechange = function() {
+
+	   //  if(http.readyState === 4 && http.status === 200){
+	   //        var response = JSON.parse(http.responseText);
+	   // 	   if(response.success){
+	   //	     console.log("Task removed :", response.name);
+	   //	   }else {
+	   //	    console.log("Task not remove:", response.name);
+	   //	   }
+	   //     }		
+	   //};
+	  // http.send(JSON.stringify(data));
+	  //}
+
+		</script>
+
+        <script inline="javascript">
+            function addTask() {
+                var name = document.querySelector("#name").value;
+                if (!name) {
+                    return;
+                }
+
+                console.log(name);
+
+                var http = new XMLHttpRequest();
+
+				// We are not using any CSRF protection(!) this should not be done in production
+                http.open("POST", 'add', true);
+                http.setRequestHeader("Content-type", "application/json");
+                var data = new Object();
+                data.name = name;
+
+                http.onreadystatechange = function () {
+                    if (http.readyState === 4) {
+                        if (http.status === 200) {
+                            addTaskToList(JSON.parse(http.responseText));
+                        }
+                    }
+                }
+
+                http.send(JSON.stringify(data));
+            }
+
+
+            function addTaskToList(task) {
+                var liElement = document.createElement("li");
+                liElement.appendChild(document.createTextNode(task.name));
+
+		//var btElement = document.createElement("button");
+		//btElement.textContent = "Remove Task";
+		//btElement.addEventListener("click", function(){
+		// removeTask(task);
+		//});
+		//liElement.appendChild(btElement);
+		
+                document.querySelector("#tasks").appendChild(liElement);
+            }
+
+
+            window.onload = function () {
+                loadTasks();
+            };
+        </script>
+    </body>
+</html>
