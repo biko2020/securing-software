@@ -7,20 +7,26 @@ from .models import File
 
 @login_required
 def deleteView(request):
-	f = File.objects.get(pk=request.POST.get('id'))
-	f.delete()
+	try:
+		f = File.objects.get(pk=request.POST.get('id'), owner=request.user)
+		f.delete()
+	except File.DoesNotExist:
+		pass
 	return redirect('/')
 	
 
 @login_required
 def downloadView(request, fileid):
-	f = File.objects.get(pk=fileid)
+	try:
 
-	filename = f.data.name.split('/')[-1]
-	response = HttpResponse(f.data, content_type='text/plain')
-	response['Content-Disposition'] = 'attachment; filename=%s' % filename
+		f = File.objects.get(pk=fileid, owner=request.user)
+		filename = f.data.name.split('/')[-1]
+		response = HttpResponse(f.data, content_type='text/plain')
+		response['Content-Disposition'] = 'attachment; filename=%s' % filename
 
-	return response
+		return response
+	except File.DoesNotExist:
+		return redirect('/')
 
 
 @login_required
