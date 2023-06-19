@@ -8,16 +8,25 @@ from .models import Account
 
 
 @login_required
-@csrf_exempt
 def transferView(request):
-	
-	if request.method == 'GET':
-		to = User.objects.get(username=request.GET.get('to'))
-		amount = int(request.GET.get('amount'))
-	
-	return redirect('/')
+    if request.method == 'POST':
+        with transaction.atomic():
+            to = User.objects.get(username=request.POST.get('to'))
+            sender = User.objects.get(username=request.user)
+            acc1 = Account.objects.get(user=sender)
+            acc2 = Account.objects.get(user=to)
+            amount = int(request.POST.get('amount'))
 
+            if amount <= 0 or acc1.balance < amount or sender == to:
+                return redirect('/')
 
+            acc1.balance -= amount
+            acc2.balance += amount
+
+            acc1.save()
+            acc2.save()
+
+    return redirect('/')
 
 @login_required
 def homePageView(request):
