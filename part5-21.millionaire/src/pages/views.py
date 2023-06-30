@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect
 
 from .models import questions
@@ -10,24 +11,33 @@ def find_topic(tid):
 
 
 def quizView(request, tid):
+
 	topic = find_topic(tid)
 
 	request.session['level'] = 0
+	request.session['finished'] = 0
 	return render(request, 'pages/question.html', {'topic' : topic, 'question' : topic['questions'][0]})
 
 
 
 def answerView(request, tid, aid):
-		
+	request.session['finished'] = 0
+	if request.session['topic'] != tid or request.session['level'] == -1 :
+		return redirect('/cheater/')
 	topic = find_topic(tid)
 
 	level = request.session['level']
+	print("currently at level: ", level)
 
 	if topic['questions'][level]['correct'] == aid:
 		level += 1
 		request.session['level'] = level
+		print("moving to level: ", level)
 
 		if level == len(topic['questions']):
+			request.session['level'] = -1
+			request.session['finished'] = 1
+			print("level reset to: ", request.session['level'])
 			return redirect('/finish/')
 
 		return render(request, 'pages/question.html', {'topic' : topic, 'question' : topic['questions'][level]})
@@ -36,11 +46,20 @@ def answerView(request, tid, aid):
 
 
 def incorrectView(request):
+	request.session['level'] = -1
 	return render(request, 'pages/incorrect.html')
 
 
 def finishView(request):
-	return render(request, 'pages/finish.html')
+	try:
+		if request.session['finished'] == 1:
+			request.session['finished'] = 0
+			return render(request, 'pages/finish.html')
+		else:
+			return redirect('/cheater/')
+	except:
+		return redirect('/cheater/')
+	
 
 
 def cheaterView(request):
@@ -54,6 +73,8 @@ def thanksView(request):
 
 
 def topicView(request, tid):
+	request.session['finished'] = 0
+	request.session['topic'] = tid
 	topic = find_topic(tid)
 	return render(request, 'pages/topic.html', {'topic' : topic})
 
