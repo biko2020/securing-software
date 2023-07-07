@@ -11,22 +11,39 @@ def find_topic(tid):
 
 
 def quizView(request, tid):
+<<<<<<< HEAD
 
 	request.session['level'] = 0
 	request.session['topic'] = tid
 	topic = find_topic(tid)
 
+=======
+
+	topic = find_topic(tid)
+
+	request.session['level'] = 0
+	request.session['finished'] = 0
+>>>>>>> cf1ba96d7c852b6ea5e9ae86237edab57b636920
 	return render(request, 'pages/question.html', {'topic' : topic, 'question' : topic['questions'][0]})
 
 
 
 def answerView(request, tid, aid):
+<<<<<<< HEAD
 
+=======
+	request.session['finished'] = 0
+>>>>>>> cf1ba96d7c852b6ea5e9ae86237edab57b636920
 	if request.session['topic'] != tid or request.session['level'] == -1 :
 		return redirect('/cheater/')
 	topic = find_topic(tid)
 	level = request.session.get('level')
 
+<<<<<<< HEAD
+=======
+	level = request.session['level']
+	print("currently at level: ", level)
+>>>>>>> cf1ba96d7c852b6ea5e9ae86237edab57b636920
 
 	if topic['questions'][level]['correct'] == aid:
 		level += 1
@@ -36,6 +53,10 @@ def answerView(request, tid, aid):
 		if level == len(topic['questions']):
 			request.session['level'] = -1
 			request.session['finished'] = 1
+<<<<<<< HEAD
+=======
+			print("level reset to: ", request.session['level'])
+>>>>>>> cf1ba96d7c852b6ea5e9ae86237edab57b636920
 			return redirect('/finish/')
 
 		return render(request, 'pages/question.html', {'topic' : topic, 'question' : topic['questions'][level]})
@@ -49,7 +70,10 @@ def incorrectView(request):
 
 
 def finishView(request):
+<<<<<<< HEAD
 
+=======
+>>>>>>> cf1ba96d7c852b6ea5e9ae86237edab57b636920
 	try:
 		if request.session['finished'] == 1:
 			request.session['finished'] = 0
